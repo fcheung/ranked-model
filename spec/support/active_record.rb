@@ -69,6 +69,16 @@ ActiveRecord::Schema.define :version => 0 do
     t.float :value
     t.integer :order
   end
+
+  create_table :lists, :force => true do |t|
+    t.string :name
+  end
+
+  create_table :list_items, :force => true do |t|
+    t.integer :row_order
+    t.integer :list_id
+  end
+
 end
 
 class Duck < ActiveRecord::Base
@@ -162,4 +172,15 @@ end
 class Number < ActiveRecord::Base
   include RankedModel
   ranks :order
+end
+
+class List < ActiveRecord::Base
+  has_many :list_items, -> {rank(:row_order)}, inverse_of: :list
+  accepts_nested_attributes_for :list_items
+end
+
+class ListItem < ActiveRecord::Base
+  include RankedModel
+  belongs_to :list, inverse_of: :list_items
+  ranks :row_order, with_same: :list_id
 end
